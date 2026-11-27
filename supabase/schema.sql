@@ -80,7 +80,15 @@ alter table public.usuarios enable row level security;
 drop policy if exists usuarios_ler on public.usuarios;
 create policy usuarios_ler on public.usuarios for select to authenticated using (id = auth.uid() or public.meu_perfil() is not null);
 
-alter table public.pre_acessos enable row level security; -- sem políticas: só o servidor lê
+alter table public.pre_acessos enable row level security;
+
+-- Permissões de tabela (as regras RLS acima decidem linha a linha)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on table public.docs to authenticated;
+grant select on table public.usuarios to authenticated;
+revoke all on table public.docs from anon;
+revoke all on table public.usuarios from anon;
+revoke all on table public.pre_acessos from anon, authenticated; -- sem políticas: só o servidor lê
 
 -- 6. Chamado pelo sistema a cada login: registra o usuário e libera o acesso pré-cadastrado
 create or replace function public.entrar() returns json
