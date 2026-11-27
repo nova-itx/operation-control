@@ -49,6 +49,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brandbar .row{padding-block:14px 14px}
 .brandbar .brand{flex-direction:row;align-items:center;gap:16px}
 .brandbar .logo{height:26px;width:auto;display:block;flex:none}
+.logobtn{appearance:none;background:none;border:0;padding:4px;margin:-4px;cursor:pointer;border-radius:6px;flex:none;display:block}.logobtn:hover{opacity:.85}.logobtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .brandbar .bsep{width:1px;height:34px;background:rgb(255 255 255 / .35);flex:none}
 .brandbar .btxt{display:flex;flex-direction:column;min-width:0}
 .brandbar .eyebrow{color:rgb(255 255 255 / .78)}
@@ -231,7 +232,7 @@ svg.chart .hit:hover{fill:var(--ink);fill-opacity:.05}
 <header class="top">
   <div class="brandbar"><div class="wrap">
     <div class="row">
-      <div class="brand"><img class="logo" src="brand/logo-white.png" alt="Nova ITX" width="201" height="26"><span class="bsep" aria-hidden="true"></span><div class="btxt"><span class="eyebrow">Operações e contas</span><h1>Controle Operacional</h1></div></div>
+      <div class="brand"><button type="button" class="logobtn" data-click="tab" data-key="painel" title="Ir para o Painel" aria-label="Nova ITX, ir para o Painel"><img class="logo" src="brand/logo-white.png" alt="" width="201" height="26"></button><span class="bsep" aria-hidden="true"></span><div class="btxt"><span class="eyebrow">Operações e contas</span><h1>Controle Operacional</h1></div></div>
       <span class="spacer"></span>
       <div class="ctl" id="who"></div>
       <div class="ctl filtro"><label class="eyebrow" for="selCli">Cliente</label><select id="selCli" class="sel"></select></div>
