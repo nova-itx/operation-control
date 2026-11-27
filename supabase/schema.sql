@@ -115,7 +115,14 @@ begin
   end if;
   return json_build_object('ok', true, 'perfil', public.meu_perfil());
 end $$;
+revoke execute on function public.entrar() from public, anon;
 grant execute on function public.entrar() to authenticated;
+revoke execute on function public.meu_perfil() from public, anon;
+revoke execute on function public.pode_ler(text, text) from public, anon;
+revoke execute on function public.pode_escrever(text, text) from public, anon;
+grant execute on function public.meu_perfil() to authenticated;
+grant execute on function public.pode_ler(text, text) to authenticated;
+grant execute on function public.pode_escrever(text, text) to authenticated;
 
 -- 7. Atualização em tempo real
 do $$ begin
