@@ -291,7 +291,9 @@ const slug=s=>String(s||'').normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase
 /* ---------- dados derivados ---------- */
 const listas=()=>Object.assign({},DEF_LISTAS,S.listas||{});
 function matriz(){const m={};for(const[k] of PERFIS)m[k]=Object.assign({},DEF_MATRIZ[k]||{},(S.matriz||{})[k]||{});return m}
-function meuPerfil(){if(!S.me)return null;if(S.me.isOwner)return'admin';const a=S.me.id&&S.acessos.find(x=>x._id===S.me.id);return a&&PERFIL_NOME[a.perfil]?a.perfil:null}
+function meuPerfilReal(){if(!S.me)return null;if(S.me.isOwner)return'admin';const a=S.me.id&&S.acessos.find(x=>x._id===S.me.id);return a&&PERFIL_NOME[a.perfil]?a.perfil:null}
+function meuPerfil(){const r=meuPerfilReal();return r==='admin'&&UI.verComo&&PERFIL_NOME[UI.verComo]?UI.verComo:r}
+function setVerComo(v){const real=meuPerfilReal();if(real!=='admin')return;v=v&&v!=='admin'&&PERFIL_NOME[v]?v:'';if(v&&!UI.verComo)S._cwReal=S.canWrite;UI.verComo=v;S.canWrite=v?false:(S._cwReal!=null?S._cwReal:S.canWrite);render();window.scrollTo({top:0})}
 function P(k){const pf=meuPerfil();if(!pf)return false;if(pf==='admin')return true;const m=matriz()[pf]||{};if(!m[k])return false;return DEP[k]?!!m[DEP[k]]:true}
 const disP=(k,extra)=>(!S.canWrite||!P(k)||extra)?' disabled':'';
 const podeAcessos=()=>P('gerenciar_acessos')&&!!(S.me&&S.me.canEdit);
@@ -1341,11 +1343,12 @@ function render(){
   const pf=meuPerfil();const vis=tabsVisiveis();if(pf&&!vis.some(t=>t[0]===UI.tab))UI.tab=vis[0][0];
   document.getElementById('tabs').innerHTML=(pf?vis:[]).map(([k,l])=>`<button class="tab" role="tab" aria-selected="${UI.tab===k}" data-click="tab" data-key="${k}">${l}</button>`).join('');
   document.body.classList.toggle('num-full',sis().cartoes==='completo');
-  const who=document.getElementById('who');if(who){who.innerHTML=S.me&&S.me.id?`<img src="${esc(S.me.avatarUrl)}" alt="" width="26" height="26" style="border-radius:50%"><div class="who" style="min-width:0"><span class="small">${esc(S.me.name||'Você')}</span>${pf?`<small>${PERFIL_NOME[pf]}</small>`:'<small>sem perfil</small>'}</div>`:''}
+  const who=document.getElementById('who');if(who){who.innerHTML=S.me&&S.me.id?`<img src="${esc(S.me.avatarUrl)}" alt="" width="26" height="26" style="border-radius:50%"><div class="who" style="min-width:0"><span class="small">${esc(S.me.name||'Você')}</span>${pf?`<small>${PERFIL_NOME[pf]}${UI.verComo?' (simulação)':''}</small>`:'<small>sem perfil</small>'}</div>`+(meuPerfilReal()==='admin'?`<label class="eyebrow" for="verComo" style="margin-left:10px">Ver como</label><select id="verComo" class="sel" title="Veja o sistema como outro perfil vê. Nada pode ser alterado durante a simulação.">${PERFIS.map(([k,l])=>`<option value="${k==='admin'?'':k}" ${(UI.verComo||'')===(k==='admin'?'':k)?'selected':''}>${k==='admin'?l+' (você)':l}</option>`).join('')}</select>`:''):''}
   document.querySelectorAll('.top .ctl.filtro').forEach(el=>el.hidden=!pf);
   const app=document.getElementById('app');
   const ae=document.activeElement;let keep=null;if(ae&&ae.id&&app.contains(ae)&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName))keep={id:ae.id,val:ae.value,dirty:ae.dataset.dirty==='1',s:ae.selectionStart,e:ae.selectionEnd};
   let h='';
+  if(UI.verComo&&meuPerfilReal()==='admin')h+=`<div class="banner" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-left:4px solid var(--warn)"><div style="flex:1;min-width:240px"><b>Você está vendo o sistema como ${esc(PERFIL_NOME[UI.verComo])}.</b> As telas, os menus, os relatórios e os valores aparecem exatamente como para esse perfil. Nada pode ser alterado durante a simulação.</div><button class="btn small primary" data-click="sairVerComo">Voltar ao Administrador</button></div>`;
   if(S.dbState==='none')h+=`<div class="banner"><b>Banco de dados indisponível nesta visualização.</b> Entre com a sua conta Microsoft da Nova ITX para ver e salvar os dados.</div>`;
   else if(!S.canWrite)h+=`<div class="banner">Você está vendo em modo leitura. Peça acesso de edição para lançar valores.</div>`;
   if(S.dbState!=='none'&&!allLoaded())h+=`<div class="empty">Carregando dados…</div>`;
@@ -1366,6 +1369,7 @@ document.addEventListener('change',e=>{
   if(t.id==='selCli'){UI.cli=t.value;UI.mes=null;saveUI();render();return}
   if(t.id==='fisMesSel'){UI.fisMes=t.value;render();return}
   if(t.id==='conv-perfil'){UI.convPerfil=t.value;return}
+  if(t.id==='verComo'){setVerComo(t.value);return}
   if(t.id==='relSortSel'){UI.relSort=UI.relSort||{};if(t.value)UI.relSort[UI.rel]={col:t.value,dir:(UI.relSort[UI.rel]||{}).dir||'asc'};else delete UI.relSort[UI.rel];saveUI();render();return}
   if(t.dataset&&t.dataset.act==='mnota'){if(!S.canWrite||!P('editar_mes')){render();return}const k=t.dataset.key;const v=t.value.trim();patch('mesnotas',k,o=>{o.mes=k;if(v)o.texto=v;else delete o.texto},true);toast('Anotação do mês salva.');return}
   const act=t.dataset.act;if(!act)return;delete t.dataset.dirty;
@@ -1456,6 +1460,7 @@ function doAction(a,d){
     case'addUser':{const sel=document.getElementById('np-'+d.id);const pf=sel&&sel.value;if(!PERFIL_NOME[pf])break;patch('acessos',d.id,o=>Object.assign(o,{perfil:pf,desde:new Date().toISOString(),por:S.me.id}),true);UI.busca=[];UI.buscaQ='';if(S.solicitacoes.some(x=>x._id===d.id))remove('solicitacoes',d.id);toast(`Acesso liberado como ${PERFIL_NOME[pf]}.`);break}
     case'liberar':{const sel=document.getElementById('sp-'+d.id);const pf=sel&&sel.value;if(!PERFIL_NOME[pf])break;patch('acessos',d.id,o=>Object.assign(o,{perfil:pf,desde:new Date().toISOString(),por:S.me.id}),true);remove('solicitacoes',d.id);toast(`Acesso liberado como ${PERFIL_NOME[pf]}.`);break}
     case'recusar':remove('solicitacoes',d.id);toast('Pedido recusado.');break;
+    case'sairVerComo':setVerComo('');toast('Você voltou ao perfil Administrador.');break;
     case'expCodigo':{if(!S.me||!S.me.isOwner)break;(async()=>{let html='';try{const r=await fetch(location.href,{cache:'no-store'});if(r.ok)html=await r.text()}catch(e){}if(!/<script/i.test(html))html='<!doctype html>\n'+document.documentElement.outerHTML;const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(!dl){toast('O download não está disponível nesta visualização.');return}await dl.save({filename:'gestao-prestadores-novaitx.html',data:html})})().catch(e=>{if(!e||e.code!=='declined')toast('Não foi possível baixar o código.')});break}
     case'expDados':{if(!S.me||!S.me.isOwner||!S.db)break;toast('Reunindo os dados…');(async()=>{const cols=['clientes','contratos','vagas','prestadores','meses','mesnotas','notas','centros','auditoria','config','mercado','relconfig','relnotas','perfis','acessos','solicitacoes','convites'];const out={exportadoEm:new Date().toISOString(),colecoes:{}};for(const c of cols){try{const sn=await S.db.collection(c).limit(1000).get();out.colecoes[c]={};sn.docs.forEach(d=>{out.colecoes[c][d.id]=d.data()})}catch(e){out.colecoes[c]={_erro:String((e&&e.code)||e)}}}const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(!dl){toast('O download não está disponível nesta visualização.');return}await dl.save({filename:'dados-novaitx-'+hojeLocal()+'.json',data:JSON.stringify(out,null,1)});toast('Dados baixados.')})().catch(e=>{if(!e||e.code!=='declined')toast('Não foi possível baixar os dados.')});break}
     case'convidar':{if(!S.canWrite)break;const em=String(UI.convEmail||'').trim().toLowerCase();const pf=UI.convPerfil||'operador';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Informe um e-mail válido, por exemplo nome@empresa.com.br.');break}if(!PERFIL_NOME[pf])break;const key=convKey(em);const ja=(S.convites||[]).find(c=>c._id===key&&!c.aceitoEm);patch('convites',key,o=>{Object.assign(o,{email:em,perfil:pf,em:new Date().toISOString(),por:S.me&&S.me.id});delete o.aceitoEm;delete o.usuario},true);UI.convEmail='';render();toast(ja?'Convite atualizado. Clique em Enviar e-mail.':'Convite registrado. Clique em Enviar e-mail para mandar o link.');
