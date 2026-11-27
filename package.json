@@ -1,0 +1,14 @@
+{
+  "name": "operation-control",
+  "private": true,
+  "type": "module",
+  "description": "Gestão de Prestadores Nova ITX",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "importar": "node scripts/importar.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "@vercel/functions": "^1.5.0"
+  }
+}
