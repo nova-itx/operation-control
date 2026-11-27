@@ -5,3 +5,4 @@ node_modules/
 # Nunca versionar a cópia dos dados (tem salários e dados fiscais)
 dados-novaitx-*.json
 *.json.bak
+!.env.example
