@@ -43,24 +43,26 @@ Quem administra o Microsoft 365 da Nova ITX faz este passo:
 3. Clique em **Deploy**.
 
 ### 4. Importar os dados atuais
-Num computador com Node 20+:
+**Jeito mais simples (sem instalar nada):** no Supabase, abra **SQL Editor > New query**, cole todo o arquivo `dados-novaitx.sql` (enviado à parte, fora do GitHub) e clique em **Run**.
+
+**Alternativa por linha de comando** (Node 20+), a partir do JSON exportado do claude.ai:
 ```bash
 npm install
 SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run importar -- caminho/dados-novaitx-2026-11-27.json
 ```
-O arquivo de dados **não vai para o GitHub** (está no `.gitignore`): tem salários e dados fiscais.
+Os arquivos de dados **não vão para o GitHub** (estão no `.gitignore`): têm salários e dados fiscais.
 
 ### 5. Primeiro acesso
 Os acessos iniciais estão em `supabase/schema.sql` (tabela `pre_acessos`). No primeiro login com Microsoft, cada pessoa recebe o perfil cadastrado:
 
 | E-mail | Perfil |
 |---|---|
-| vanessa@novaitx.com | Administrador (dona do sistema) |
+| vanessa@novaitx.com.br | Administrador (dona do sistema) |
 | claudia.miranda@novaitx.com.br | Operador |
 | fernanda.sales@novaitx.com.br | Financeiro |
 | marcos.miranda@novaitx.com.br | Diretoria |
 
-Novas pessoas: use **Acessos > Convidar por e-mail** ou libere em **Pedidos de acesso**.
+Novas pessoas: use **Acessos > Convidar por e-mail** (o perfil é liberado no primeiro login com aquele e-mail) ou libere em **Pedidos de acesso**.
 
 ## Segurança
 - Só quem tem perfil lê os dados. A **Diretoria** só consulta. Só **Administradores** mudam acessos, perfis, convites e pedidos. Isso é garantido no banco (regras RLS), não só na tela.

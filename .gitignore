@@ -6,3 +6,4 @@ node_modules/
 dados-novaitx-*.json
 *.json.bak
 !.env.example
+dados-novaitx*.sql

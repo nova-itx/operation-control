@@ -32,7 +32,7 @@ create table if not exists public.pre_acessos (
 );
 
 insert into public.pre_acessos (email, perfil, dono) values
-  ('vanessa@novaitx.com', 'admin', true),
+  ('vanessa@novaitx.com.br', 'admin', true),
   ('claudia.miranda@novaitx.com.br', 'operador', false),
   ('fernanda.sales@novaitx.com.br', 'financeiro', false),
   ('marcos.miranda@novaitx.com.br', 'diretoria', false)
@@ -85,7 +85,7 @@ alter table public.pre_acessos enable row level security; -- sem políticas: só
 -- 6. Chamado pelo sistema a cada login: registra o usuário e libera o acesso pré-cadastrado
 create or replace function public.entrar() returns json
 language plpgsql security definer set search_path = public as $$
-declare u record; p record;
+declare u record; p record; c record;
 begin
   select id, lower(email) as email,
          coalesce(raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', '') as nome
@@ -98,6 +98,20 @@ begin
     insert into public.docs (collection, id, data) values ('acessos', u.id::text,
       jsonb_build_object('perfil', p.perfil, 'desde', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'convite', p.email)
       || case when p.dono then '{"dono": true}'::jsonb else '{}'::jsonb end);
+  end if;
+  -- Convites feitos pela tela Acessos > Convidar por e-mail
+  if not exists (select 1 from public.docs where collection = 'acessos' and id = u.id::text) then
+    select id, data into c from public.docs
+      where collection = 'convites' and lower(data->>'email') = u.email and data->>'aceitoEm' is null
+        and data->>'perfil' in ('admin','diretoria','financeiro','operador')
+      limit 1;
+    if c.id is not null then
+      insert into public.docs (collection, id, data) values ('acessos', u.id::text,
+        jsonb_build_object('perfil', c.data->>'perfil', 'desde', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'convite', u.email, 'por', c.data->>'por'));
+      update public.docs set data = data || jsonb_build_object('aceitoEm', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'usuario', u.id::text)
+        where collection = 'convites' and id = c.id;
+      delete from public.docs where collection = 'solicitacoes' and id = u.id::text;
+    end if;
   end if;
   return json_build_object('ok', true, 'perfil', public.meu_perfil());
 end $$;

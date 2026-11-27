@@ -81,6 +81,8 @@
     canal = sb.channel('docs').on('postgres_changes', { event: '*', schema: 'public', table: 'docs' }, p => {
       const r = p.eventType === 'DELETE' ? p.old : p.new;
       if (!r || !r.collection) return;
+      // Perfil da própria pessoa mudou (liberado, alterado ou removido): recarrega para valer na hora
+      if (r.collection === 'acessos' && r.id === uid && JSON.stringify(p.eventType === 'DELETE' ? null : r.data && r.data.perfil) !== JSON.stringify(acesso && acesso.perfil)) { location.reload(); return; }
       aplicar(r.collection, r.id, p.eventType === 'DELETE' ? null : r.data);
     }).subscribe();
   }
