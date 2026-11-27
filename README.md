@@ -26,7 +26,7 @@ Roda na **Vercel**, com banco e login no **Supabase** e entrada pela **conta Mic
 ### 2. Login com Microsoft (Microsoft Entra ID)
 Quem administra o Microsoft 365 da Nova ITX faz este passo:
 1. Em [entra.microsoft.com](https://entra.microsoft.com): **Identity > Applications > App registrations > New registration**.
-2. Nome: `Gestão de Prestadores`. Tipo de conta: **Accounts in this organizational directory only**.
+2. Nome: `Gestão Operacional`. Tipo de conta: **Accounts in this organizational directory only**.
 3. Redirect URI (Web): `https://SEU-PROJETO.supabase.co/auth/v1/callback`.
 4. Depois de criar, anote o **Application (client) ID** e o **Directory (tenant) ID**.
 5. Em **Certificates & secrets > New client secret**, crie e anote o **Value**.

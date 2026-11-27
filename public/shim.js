@@ -14,7 +14,7 @@
     el.setAttribute('style', 'position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#0b1a4a;font-family:"IBM Plex Sans",system-ui,sans-serif');
     el.innerHTML = '<div style="background:#fff;border-radius:12px;padding:32px 28px;width:min(380px,92vw);text-align:center;box-shadow:0 20px 60px rgb(0 0 0 / .3)">' +
       '<div style="background:#0b1a4a;border-radius:8px;padding:14px;margin-bottom:20px"><img src="/brand/logo-white.png" alt="Nova ITX" style="height:24px"></div>' +
-      '<h1 style="font-size:18px;margin:0 0 6px;color:#141b26">Controle Operacional</h1>' +
+      '<h1 style="font-size:18px;margin:0 0 6px;color:#141b26">Gestão Operacional</h1>' +
       '<p style="font-size:13.5px;color:#586477;margin:0 0 20px">Entre com a sua conta Microsoft da Nova ITX.</p>' +
       '<button id="btn-ms" style="width:100%;padding:11px 14px;border-radius:8px;border:1px solid #1f4fe0;background:#1f4fe0;color:#fff;font:600 14px inherit;cursor:pointer">Entrar com Microsoft</button>' +
       '<p id="login-erro" style="font-size:12.5px;color:#b42828;margin:12px 0 0"></p></div>';
